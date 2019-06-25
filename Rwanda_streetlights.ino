@@ -117,6 +117,7 @@ void loop() {
       delay(200);
       failCount ++;
       if (failCount > 4){
+        fona.enableGPRS(false);
         break;
       }
     }
@@ -231,12 +232,12 @@ void loop() {
       
         Serial.println("request sent");
         failure = 0;
+        doc.clear();
         delay(500);
         
     }
     
       strip.show();                                                     // Enact on the colour change
-    
       Serial.println("Going to sleep now");
     
       fona.enableGPRS(false);
