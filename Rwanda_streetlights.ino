@@ -1,3 +1,4 @@
+
 /*
 
 This sketch gets the latest epoch timestamp from the NTP server,
@@ -23,6 +24,7 @@ This was written by Jordan Silverman of Scene Connect Ltd.
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 SoftwareSerial *fonaSerial = &fonaSS;
 Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+
 uint8_t readline(char *buff, uint8_t maxbuff, uint16_t timeout = 0);
 uint8_t type;
 
@@ -37,8 +39,7 @@ const long sleepTime = 200;                          // Amount of time in second
 
 int SOC[numOfInstallations];                        // Initialising an array of ints for the SOC of each lamp
 
-const char* host = "142.93.40.176:5000";            // Info for getting the data
-char token[] = "X-Authorization: Token c324f8876e672ad1797cd69a9d9f62611507d25aa5a0b1ff40f9fb524d96f2fc";   // This is my personal token which authenticates me as the user
+const char* host = "142.93.40.176:5000";            // Info for getting the date   // This is my personal token which authenticates me as the user
 
 long latestReadingTime;                             // Initialiser for the latest reading time from the lamp
 
@@ -48,7 +49,6 @@ unsigned long previousMillis = 0 - (sleepTime*1000);
 #define PIN 12
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(numOfInstallations, PIN);       //numOfInstallations should also be equal to number of lights
 uint32_t red = strip.Color(255, 0, 0);
-uint32_t yellow = strip.Color(255, 255, 0);
 uint32_t green = strip.Color(0, 255, 0);
 
 time_t endTime = 0;
@@ -90,15 +90,15 @@ void setup() {
   strip.show(); // Initialize all pixels to 'off'
   strip.setBrightness(180);
 
-//  fona.setGPRSNetworkSettings(F("data.lycamobile.co.uk"), F(""), F(""));
-  fona.setGPRSNetworkSettings(F("internet.mtn"), F(""), F(""));
+  fona.setGPRSNetworkSettings(F("data.lycamobile.co.uk"), F(""), F(""));
+//  fona.setGPRSNetworkSettings(F("internet.mtn"), F(""), F(""));
 
   int n = 0;
   while((n != 1) && (n != 5)) {
     n = fona.getNetworkStatus();
     delay(200);
   }
-  Serial.println("Setup done");  
+  Serial.println(F("Setup done"));  
 }
 
 void loop() {
@@ -106,11 +106,11 @@ void loop() {
   
   if (currentMillis - previousMillis >= (sleepTime*1000)) {
 
-    Serial.println("Waking up GSM");
+    Serial.println(F("Waking up GSM"));
     fona.wake();
 
     int failCount = 0;
-    Serial.println("Enabling GPRS");
+    Serial.println(F("Enabling GPRS"));
     boolean w = false;
     while (w != true) {
       w = fona.enableGPRS(true);
@@ -122,7 +122,7 @@ void loop() {
       }
     }
 
-    Serial.println("Setting Time");
+    Serial.println(F("Setting Time"));
     failCount = 0;
     boolean t = false;
     while (t != true) {
@@ -153,31 +153,31 @@ void loop() {
       char url1[60];
       char url2[45];
       char url[105];
-      Serial.print("ID: ");
+      Serial.print(F("ID: "));
       Serial.println(idSites[i]);
-      Serial.print("Instance: ");
+      Serial.print(F("Instance: "));
       Serial.println(instance[i]);
-      Serial.print("Start time: ");
+      Serial.print(F("Start time: "));
       Serial.println(startTime);
-      Serial.print("End time: ");
+      Serial.print(F("End time: "));
       Serial.println(endTime);
       snprintf(url1, sizeof(url1), "%s/victronapi/?id=%lu&instance=%d", host, idSites[i], instance[i]);
       snprintf(url2, sizeof(url2), "&start=%lu&end=%lu", startTime, endTime);
       snprintf(url, sizeof(url), "%s%s", url1, url2);
       
-        Serial.print("connecting to ");
+        Serial.print(F("connecting to "));
         Serial.println(url);
       
         uint16_t statuscode;
         int16_t length;
-        if (!fona.HTTP_GET_start(url, token, &statuscode, (uint16_t *)&length)) {
-              Serial.println("Failed!");
+        if (!fona.HTTP_GET_start(url, "X-Authorization: Token c324f8876e672ad1797cd69a9d9f62611507d25aa5a0b1ff40f9fb524d96f2fc", &statuscode, (uint16_t *)&length)) {
+              Serial.println(F("Failed!"));
               failure = 1;
               previousMillis = currentMillis - sleepTime*1000;
               break;
         }
 
-        char response[500];
+        char response[400] = "";
         int c = 0;
         while (length > 0) {
            while (fona.available()) {
@@ -188,20 +188,20 @@ void loop() {
           }
         }
 
-        Serial.print("Response: ");
+        Serial.print(F("Response: "));
         Serial.println(response);
 
-        StaticJsonDocument<500> doc;                       // Json document setup
+        StaticJsonDocument<400> doc;                       // Json document setup
         // Get the Json data from the response
         DeserializationError error = deserializeJson(doc, response);
         if (error) {
           Serial.print(F("deserializeJson() failed: "));
           Serial.println(error.c_str());
-          Serial.print("\r\n");
+          Serial.print(F("\r\n"));
           //return;
         }
         else {
-          Serial.println("deserializeJson() successful\r\n");
+          Serial.println(F("deserializeJson() successful\r\n"));
         }
         
         JsonArray records_data_51 = doc["records"]["data"]["51"];       // Find the specific SOC stats that we're looking for
@@ -218,15 +218,15 @@ void loop() {
         if (SOC[i] < 60) {strip.setPixelColor(i, red);}                     // Set the colour according to the SOC
         if (SOC[i] > 60) {strip.setPixelColor(i, green);}
       
-        Serial.print("Lamp number ");
+        Serial.print(F("Lamp number "));
         Serial.println(i + 1);
-        Serial.print("Number of Readings: ");
+        Serial.print(F("Number of Readings: "));
         Serial.println(numReadings);
-        Serial.print("Latest reading time: ");
+        Serial.print(F("Latest reading time: "));
         Serial.println(latestReadingTime);
-        Serial.print("SOC: ");
+        Serial.print(F("SOC: "));
         Serial.println(SOC[i]);
-        Serial.print("\r\n");
+        Serial.print(F("\r\n"));
         Serial.println(F("\n****"));
         fona.HTTP_GET_end();
       
@@ -234,7 +234,6 @@ void loop() {
         failure = 0;
         doc.clear();
         delay(500);
-        
     }
     
       strip.show();                                                     // Enact on the colour change
@@ -244,7 +243,7 @@ void loop() {
       fona.sleep();
 
       if (failure == 0){
-      previousMillis = currentMillis;
+        previousMillis = currentMillis;
       }
 }
 }
