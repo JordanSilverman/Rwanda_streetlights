@@ -31,7 +31,8 @@ uint8_t type;
 /// ENTER THE NUMBER OF INSTALLATIONS AND THE SITE IDS AND INSTANCE IDS
 /// NOTE: PUT THE CORRESPONDING SITE ID AND INSTANCE INTO THE SAME POSITION IN THE ARRAY
 #define numOfInstallations 4
-uint32_t idSites[] = {38205, 38215, 38218, 38253};      // 
+//uint32_t idSites[] = {38205, 38215, 38218, 38253};      //
+uint32_t idSites[] = {38253, 38215, 38218, 38205};
 uint32_t instance[] = {260,   260,   260,   260};       //   
 
 const int inactiveInterval = 900;                   // Amount of time in seconds for a lamp to be inactive (not sending data) before we consider there is no energy
@@ -90,8 +91,8 @@ void setup() {
   strip.show(); // Initialize all pixels to 'off'
   strip.setBrightness(180);
 
-  fona.setGPRSNetworkSettings(F("data.lycamobile.co.uk"), F(""), F(""));
-//  fona.setGPRSNetworkSettings(F("internet.mtn"), F(""), F(""));
+//  fona.setGPRSNetworkSettings(F("data.lycamobile.co.uk"), F(""), F(""));
+  fona.setGPRSNetworkSettings(F("internet.mtn"), F(""), F(""));
 
   int n = 0;
   while((n != 1) && (n != 5)) {
@@ -216,7 +217,7 @@ void loop() {
         else {SOC[i] = 0;}                                              // If there are no readings, SOC = 0
       
         if (SOC[i] < 60) {strip.setPixelColor(i, red);}                     // Set the colour according to the SOC
-        if (SOC[i] > 60) {strip.setPixelColor(i, green);}
+        if (SOC[i] >= 60) {strip.setPixelColor(i, green);}
       
         Serial.print(F("Lamp number "));
         Serial.println(i + 1);
