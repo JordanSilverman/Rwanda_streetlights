@@ -31,8 +31,8 @@ uint8_t type;
 /// ENTER THE NUMBER OF INSTALLATIONS AND THE SITE IDS AND INSTANCE IDS
 /// NOTE: PUT THE CORRESPONDING SITE ID AND INSTANCE INTO THE SAME POSITION IN THE ARRAY
 #define numOfInstallations 4
-//uint32_t idSites[] = {38205, 38215, 38218, 38253};      //
-uint32_t idSites[] = {38253, 38215, 38218, 38205};
+//uint32_t idSites[] = {38205, 38215, 38218, 38253};      // SL1, SL2, SL3, SL4
+uint32_t idSites[] = {38253, 38215, 38218, 38205};        // SL4, SL2, SL3, SL1
 uint32_t instance[] = {260,   260,   260,   260};       //   
 
 const int inactiveInterval = 900;                   // Amount of time in seconds for a lamp to be inactive (not sending data) before we consider there is no energy
